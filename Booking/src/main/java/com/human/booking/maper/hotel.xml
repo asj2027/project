@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.booking.iHotel">
+<select id='list' resultType="com.human.booking.hotelDTO">
+	select a.seq, a.name, a.type, a.num, a.price, b.typename
+	from hotel a, room b
+	where a.type=b.type
+</select>
+<select id='getlist' resultType="com.human.booking.hotelDTO">
+	select type, typename from room
+</select>
+<insert id='addhotel'>
+	insert into hotel values(hseq.nextval, #{param1}, #{param2}, #{param3}, #{param4})
+</insert>
+<select id='viewlist' resultType='com.human.booking.hotelDTO'>
+	select seq, name, type, num, price from hotel where seq=#{param1}
+</select>
+<update id='updatehotel'>
+	update hotel set name=#{param1}, type=#{param2}, num=#{param3}, price=#{param4} where seq=#{param5}
+</update>
+<delete id='deletehotel'>
+	delete from hotel where seq=#{param1}
+</delete>
+
+<select id='yeyaklist' resultType="com.human.booking.hotelDTO">
+	select seq, name, price, num from hotel
+	where type=#{param1} and num<![CDATA[>=]]>#{param2}
+	and seq not in
+	(select seq from control
+	where type=#{param1} and tnum<![CDATA[>=]]>#{param2}
+	and(checkin between #{param3} and #{param4} OR checkout between #{param3} and #{param4}
+	or(checkin <![CDATA[<=]]> #{param3} and checkout <![CDATA[>=]]> #{param4})))
+</select>
+<select id='notlist' resultType="com.human.booking.hotelDTO">
+	select b.seq, b.name, a.tnum, a.checkin, a.checkout, a.tname, a.order_no
+	from control a, hotel b
+	where b.type=#{param1} and a.tnum<![CDATA[>=]]>#{param2}
+	and (a.checkin between #{param3} and #{param4} or a.checkout between #{param3} and #{param4}
+	or(a.checkin <![CDATA[<=]]> #{param3} and a.checkout <![CDATA[>=]]> #{param4}))
+	and a.seq=b.seq
+</select>
+
+<select id='conlist' resultType="com.human.booking.hotelDTO">
+	select a.order_no, c.name, a.tnum, a.tprice, a.tname, a.mobile, a.checkin, a.checkout, b.typename
+	from control a, room b, hotel c
+	where a.seq=c.seq and a.type=b.type and a.order_no=#{param1}
+</select>
+<insert id='addcon'>
+	insert into control values(cseq.nextval, #{param1}, #{param2}, #{param3}, #{param4}, #{param5}, #{param6}, #{param7}, #{param8})
+</insert>
+<update id='updatecon'>
+	update control set tnum=#{param1}, tname=#{param2}, mobile=#{param3} where order_no=#{param4}
+</update>
+<delete id='deletecon'>
+	delete from control where order_no=#{param1}
+</delete>
+</mapper>
