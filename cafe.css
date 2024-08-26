@@ -1,0 +1,39 @@
+table {
+    border-collapse: collapse; height: 480px; border: 1px solid black;
+    font-weight: bold;
+}
+select {
+    border: 1px solid darksalmon;
+    width: 400px;
+    height: 300px;
+    margin: 4px;
+    background-color:darkslategrey;
+}
+option {
+    font-size: 20px;
+    font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    padding: 12px;
+    color: white;
+}
+td {
+    font-size: 20px;
+    text-align: center;
+}
+#menu, #su, #price, #mobile, #t_price, #mm {
+    border: 1px solid darksalmon;
+    width: 200px;
+    height: 22px;
+    font-size: 15px;
+    font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+#sub, #reset, #sub2, #reset2, #btnAdd, #btnDelete, #btnRemove, #btnCancel {
+    width: 80px;
+    height: 30px;
+    font-size: 15px;
+    border: 1px solid darksalmon;
+    font-weight: bold;
+}
+#_name, #_price {
+    border: 1px solid darksalmon;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
