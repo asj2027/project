@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.comment.CommentRepository">
+    <select id = "getOrder" resultType = "Integer">
+        select NVL(max(reorder),0)+1 from post_comment where post_id = #{param1}
+    </select>
+
+    <insert id = "addComment">
+        insert into post_comment values (post_comment_seq.nextval, #{param1}, #{param2}, #{param3},
+                                         to_char(sysdate, 'yyyy-mm-dd'), #{param4}, #{param5}, #{param6}, 'N')
+    </insert>
+
+    <select id = "findByPostId" resultType="com.human.gallery.domain.comment.Comment">
+        select a.*, b.id as writeName from post_comment a, users b where post_id = #{param1} and a.writer = b.userNum order by reorder asc
+    </select>
+
+    <select id = "findById" resultType="com.human.gallery.domain.comment.Comment">
+        select * from post_comment where id = #{param1}
+    </select>
+
+    <update id = "updateParentById">
+        update post_comment set reorder = reorder + 1 where post_id = #{param1} and <![CDATA[reorder > #{param2}]]>
+    </update>
+
+    <select id = "findNumByPostId" resultType="Integer">
+        select count(*) from post_comment where post_id = #{param1}
+    </select>
+
+    <update id = "updateById">
+        update post_comment set content = #{param1} where id = #{param2}
+    </update>
+
+    <select id = "findChildren" resultType="Integer">
+        select count(*) from post_comment where reparent = #{param1}
+    </select>
+
+    <update id = "updateByIdWithDelete">
+        update post_comment set content = #{param1} , isDelete = 'Y' where id = #{param2}
+    </update>
+
+    <delete id = "deleteById">
+        delete from post_comment where id = #{param1}
+    </delete>
+
+    <update id = "adjustReorder">
+        update post_comment set reorder = reorder - 1 where post_id = #{param1} and reorder > #{param2}
+    </update>
+
+    <select id = "getMaxReorder" resultType="Integer">
+        select NVL(max(reorder), 0) from post_comment where post_id = #{param1} and redepth = #{param2} and reparent = #{param3}
+    </select>
+
+    <select id = "findByIdWithPaging" resultType="com.human.gallery.domain.comment.Comment">
+        SELECT a.*,  b.id as writeName
+        FROM (
+        SELECT rownum as rn, id, post_id, writer, content, postdate, reparent, redepth, reorder, isDelete
+        FROM (select id, post_id, writer, content, postdate, reparent, redepth, reorder, isDelete
+        FROM post_comment where post_id = #{postId} order by reorder)) a, users b
+        <![CDATA[where rn >= ((#{pageNumber}-1) * 15 + 1) and rownum < 16 and a.writer = b.usernum]]>
+    </select>
+    <select id = "findOneById" resultType="com.human.gallery.domain.comment.Comment">
+        select * from post_comment where id = #{commentId}
+    </select>
+    <select id = "findUserCommentById" resultType="com.human.gallery.domain.comment.Comment" parameterType="String">
+        SELECT *
+        FROM (
+                 SELECT rownum as rn, id, post_id, writer, content, postdate, reparent, redepth, reorder, isDelete
+                 FROM (select id, post_id, writer, content, postdate, reparent, redepth, reorder, isDelete
+                       FROM post_comment where writer = #{userId} and isDelete = 'N' order by id desc, postdate desc))
+        <![CDATA[where rn >= ((#{pageNumber}-1) * 15 + 1) and rownum < 16]]>
+    </select>
+    <select id = "returnCategory" resultType="Integer">
+        select categoryList from board_post where id = #{postId}
+    </select>
+    <select id = "findCommentNumById" resultType = "Integer" parameterType="String">
+        select count(*) from post_comment where writer = #{userId}
+    </select>
+</mapper>

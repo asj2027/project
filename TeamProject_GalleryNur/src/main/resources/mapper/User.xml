@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.human.gallery.domain.user.UserRepository">
+
+<select id = "findById" resultType = "com.human.gallery.domain.user.Users">
+	select * from Users where id = #{param1} and signpath = 'NORMAL'
+</select>
+
+<insert id = "addUser">
+	insert into Users values (Users_SEQ.nextval, #{param1}, #{param2}, '방문자', #{param3}, 'NORMAL', 'N')
+</insert>
+<select id = "findNumById" resultType = "Integer">
+	select usernum from users where id = #{param1} and signpath = 'NORMAL' and isDelete = 'N'
+</select>
+<insert id = "addDetail">
+	insert into userDetail values (#{param1}, #{param2}, #{param3}, #{param4}, #{param5}, #{param6}, #{param7})
+</insert>
+<select id = "findDetailById" resultType="com.human.gallery.domain.user.Users">
+	select * from userDetail where id = #{param1}
+</select>
+<select id = "findSaltById" parameterType="String">
+	select salt from Users where id = #{id} and isDelete = 'N'
+</select>
+<select id = "findByIdWithPath" resultType="com.human.gallery.domain.user.Users" parameterType="String">
+	select * from Users where id = #{id} and signPath = #{path}
+</select>
+<insert id = "addGoogleUser" parameterType="String">
+	insert into Users values (Users_SEQ.nextval, #{id}, #{password}, '방문자', null, 'GOOGLE', 'N')
+</insert>
+<select id = "findNumByIdWithPath" parameterType="String" resultType = "Integer">
+	select usernum from users where id = #{id} and signpath = #{signpath} and isDelete = 'N'
+</select>
+<insert id = "addKakaoUser" parameterType="String">
+	insert into Users values (Users_SEQ.nextval, #{id}, #{password}, '방문자', null, 'KAKAO', 'N')
+</insert>
+	<update id="impoupdate">
+		update userdetail set username=#{param1},email=#{param2},postcode=#{param3},address=#{param4},dtaddress=#{param5},mobile=#{param6}
+		                  where id = (select usernum from users where id = #{param7})
+	</update>
+	<update id="pwdupdate">
+		update users set password=#{param1},salt=#{param2} where id=#{param3}
+	</update>
+<select id = "findUsersByEmail" resultType="Integer">
+	select id from userdetail where email = #{param1}
+</select>
+<select id = "findUserIdByNum" resultType = "String">
+	select id from users where usernum = #{param1} and isDelete = 'N'
+</select>
+<select id = "checkIdAndMail" resultType="String">
+	select id from users where id = #{userId} and signpath = 'NORMAL' and
+	                          usernum = (select id from userdetail where email = #{email}) and isDelete = 'N'
+</select>
+<update id = "changePwdWithTemp">
+	update users set password = #{temp}, salt = #{salt} where id = #{id} and signpath = 'NORMAL' and isDelete = 'N'
+</update>
+<select id = "findAllByNum" resultType="com.human.gallery.domain.user.Users">
+	select * from users where usernum = #{param1} and isDelete = 'N'
+</select>
+</mapper>

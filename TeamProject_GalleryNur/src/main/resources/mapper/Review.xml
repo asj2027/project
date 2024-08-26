@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.human.gallery.domain.review.ReviewRepository">
+	<!-- 리스트 출력 -->
+	<select id = "reviewList" resultType = "com.human.gallery.domain.review.Review" parameterType="com.human.gallery.domain.paging.pageDTO">
+		select *
+		from	(select rownum as seq, c.*
+				 from	((select rownum as rn, a.*, b.id as userid
+						  from board_post a, users b
+						  where categoryList=2
+						  and a.writer=b.userNum
+						  <include refid='type'></include>
+						  order by a.<include refid='sort'/> desc) c)
+				 where rownum <![CDATA[<=]]> #{lastRow})
+		where seq <![CDATA[>=]]> #{firstRow}
+	</select>
+
+	<sql id="sort">
+		<if test='sort==null || sort==""'>
+			id
+		</if>
+		<if test='sort=="date"'>
+			postdate desc, a.id
+		</if>
+		<if test='sort=="view"'>
+			views desc, a.id
+		</if>
+		<if test='sort=="heart"'>
+			heart desc, a.id
+		</if>
+	</sql>
+
+	<sql id='type'>
+		<if test='type != null and type != ""'>
+			<if test='type=="tc" and keyword!=null and keyword!=""'>
+				and ((title like '%' || #{keyword} || '%') or (content like '%' || #{keyword} || '%'))
+			</if>
+			<if test='type=="t" and keyword!=null and keyword!=""'>
+				and title like '%' || #{keyword} || '%'
+			</if>
+			<if test='type=="c" and keyword!=null and keyword!=""'>
+				and content like '%' || #{keyword} || '%'
+			</if>
+		</if>
+	</sql>
+
+	<!-- 카테고리2의 게시글 개수 카운트 -->
+	<select id="getCount" parameterType="com.human.gallery.domain.paging.pageDTO" resultType="int">
+		select count(*)
+		from board_post
+		where categoryList=2
+		<if test='keyword != null and keyword != ""'>
+			<if test='type=="tc"'>
+				and ((title like '%' || #{keyword} || '%') or (content like '%' || #{keyword} || '%'))
+			</if>
+			<if test='type=="t"'>
+				and title like '%' || #{keyword} || '%'
+			</if>
+			<if test='type=="c"'>
+				and content like '%' || #{keyword} || '%'
+			</if>
+		</if>
+	</select>
+
+	<!-- 선택한 게시글 상세조회 -->
+	<select id = "selView" resultType = "com.human.gallery.domain.review.Review">
+		select a.id, a.title, a.content, b.id as userid, a.categoryList, a.heart, a.postdate, a.views
+		from board_post a, users b
+		where categoryList=2
+		  and a.writer=b.usernum
+		  and a.id=#{param1}
+	</select>
+
+	<!-- 이전글, 다음글 -->
+	<select id='movePage' resultType="com.human.gallery.domain.review.Review" parameterType="String">
+		select *
+		from (select id,
+		lead(id,1,9999) over(order by <include refid="sort2"/>) as next,
+		lag(id,1,0) over(order by <include refid="sort2"/>) as last
+		from board_post
+		where categoryList=2
+		<if test='keyword != null and keyword != ""'>
+			<if test='type=="tc"'>
+				and ((title like '%' || #{keyword} || '%') or (content like '%' || #{keyword} || '%'))
+			</if>
+			<if test='type=="t"'>
+				and title like '%' || #{keyword} || '%'
+			</if>
+			<if test='type=="c"'>
+				and content like '%' || #{keyword} || '%'
+			</if>
+		</if>
+		)
+		where id=#{id}
+	</select>
+
+	<sql id="sort2">
+		<if test='sort2==null || sort2==""'>
+			id
+		</if>
+		<if test='sort2=="date"'>
+			postdate, id
+		</if>
+		<if test='sort2=="view"'>
+			views, id
+		</if>
+		<if test='sort2=="heart"'>
+			heart, id
+		</if>
+	</sql>
+
+	<!-- 조회수 -->
+	<update id="count" parameterType="String">
+		update board_post
+		set views=views+1
+		where id=#{param1}
+	</update>
+
+	<!-- 카테고리2에 새 게시글 업로드 -->
+	<insert id="insertReview">
+		insert into board_post values(board_post_seq.nextval, #{param1}, #{param2}, #{param3}, 2, 0, to_char(sysdate, 'YYYY-MM-DD'), 0)
+	</insert>
+
+	<!-- 게시글 업데이트 -->
+	<update id="updateReview">
+		update board_post
+		set title=#{param1}, content=#{param2}, postdate=to_char(sysdate, 'YYYY-MM-DD')
+		where id=#{param3}
+	</update>
+
+	<!-- 선택한 글의 추천 중복 체크 -->
+	<select id="findLike" resultType="int">
+		select count(*)
+		from post_heart
+		where post_id=#{param1}
+		and heart_id=#{param2}
+	</select>
+
+	<!-- 추천 테이블에 추천id add -->
+	<insert id="insertLike">
+		insert into post_heart values(post_heart_seq.nextval, #{param1}, #{param2})
+	</insert>
+
+	<!-- 추천+ -->
+	<update id="likeReview" parameterType="int">
+		update board_post
+		set heart=heart+1
+		where id=#{param1}
+	</update>
+
+	<!-- 댓글, 추천, 게시글 동시삭제 -->
+	<delete id="commentDelete">
+		delete from post_comment where post_id=#{param1}
+	</delete>
+	<delete id="heartDelete">
+		delete from post_heart where post_id=#{param1}
+	</delete>
+	<delete id="deleteReview">
+		delete from board_post where id=#{param1}
+	</delete>
+</mapper>

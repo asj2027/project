@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.exhibit.ExhibitRepository">
+    <insert id = "addExhibit">
+        insert into exhibition
+        values (exhibition_seq.nextval, #{param1}, #{param2}, (select id from artist where name = #{param3}), #{param4}, #{param5},
+                #{param6}, #{param7}, #{param8})
+    </insert>
+
+    <select id = "findAll" resultType="com.human.gallery.domain.exhibit.Exhibit">
+        select a.id, a.name, a.images, a.startDate, a.endDate, b.name as artist from exhibition a, artist b
+        where a.artist = b.id order by enddate desc, id desc
+    </select>
+
+    <select id = "findById" resultType="com.human.gallery.domain.exhibit.Exhibit">
+        select a.id, a.name, a.images, b.name as artist, a.artist as artistId, a.startDate, a.endDate, a.info,
+               a.price, a.total
+               from exhibition a, artist b
+        where a.artist = b.id and a.id = #{param1}
+    </select>
+
+    <delete id = "deleteById">
+        delete from exhibition where id = #{param1}
+    </delete>
+
+    <update id = "updateById">
+        update exhibition set name = #{param1}, images = #{param2},
+                              artist = (select id from artist where name = #{param3}), startDate = #{param4},
+                              endDate = #{param5}, info = #{param6}, price = #{param7},
+                              total = #{param8} where id = #{param9}
+    </update>
+    <update id = "updateByIdWithoutImages">
+        update exhibition set name = #{param1},
+                              artist = (select id from artist where name = #{param2}), startDate = #{param3},
+                              endDate = #{param4}, info = #{param5}, price = #{param6},
+                              total = #{param7} where id = #{param8}
+    </update>
+</mapper>

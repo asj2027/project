@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.reserve.ReserveRepository">
+    <insert id = "addReserve" parameterType="com.human.gallery.domain.reserve.Reserve">
+        INSERT INTO reserve values
+            (#{orderId},
+             #{exhibitId},
+             #{reserveDate},
+             #{person},
+             #{userId},
+             #{amount},
+             #{address},
+             #{postcode},
+             #{detailAddress},
+             'N')
+    </insert>
+    <delete id = "deleteById">
+        delete from reserve where orderId = #{param1}
+    </delete>
+    <select id ="findById" resultType="com.human.gallery.domain.reserve.Reserve">
+        select * from reserve where orderId = #{param1}
+    </select>
+
+    <update id = "updatePaymentById">
+        update reserve set isPayment = 'Y' where orderId = #{param1}
+    </update>
+
+    <select id = "findByUserId" resultType="com.human.gallery.domain.reserve.Reserve">
+        select a.* , b.name as exhibitName, c.username as userName
+        from reserve a, exhibition b, userDetail c
+        where a.userId = #{param1} and a.exhibit_id = b.id and a.userId = c.id order by reservedate desc
+    </select>
+    <select id = "findByIdWithUserId" resultType="com.human.gallery.domain.reserve.Reserve">
+        select a.* , b.name as exhibitName, c.username as userName
+        from reserve a, exhibition b, userDetail c
+        where a.orderId = #{param1} and a.userId = #{param2} and a.exhibit_id = b.id and a.userId = c.id
+    </select>
+
+    <update id = "updateStateByOrderId">
+        update reserve set isPayment = 'N' where orderId = #{param1}
+    </update>
+    <select id = "findByDateWithUserId" resultType="com.human.gallery.domain.reserve.Reserve">
+        select a.*, b.name as exhibitName from reserve a, exhibition b
+                                          where a.userId = #{param1} and a.reservedate = #{param2}
+                                            and a.exhibit_id = b.id
+    </select>
+
+    <select id = "findWeekByDateWithUserId" resultType="com.human.gallery.domain.reserve.Reserve" parameterType="String">
+        select distinct a.*, b.name as exhibitName from reserve a, exhibition b
+                                          where a.userId = #{userId} and a.exhibit_id = b.id
+                                            and <![CDATA[a.reservedate >= #{startDate}
+                                            and a.reservedate <= #{endDate}]]>
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.mypage.iMypage">
+    <select id="list" resultType="com.human.gallery.domain.mypage.mypageDTO">
+        select * from userdetail where id = (select usernum from users where id = #{param1})
+    </select>
+    <update id="impoupdate">
+        update userdetail set username=#{param1},email=#{param2},postcode=#{param3},address=#{param4},dtaddress=#{param5},mobile=#{param6} where id=#{param7}
+    </update>
+    <insert id="del" parameterType="com.human.gallery.domain.user.Users">
+        insert into withdrawal values (#{userNum}, #{id}, #{password}, #{role}, #{salt}, #{signPath})
+    </insert>
+    <insert id="delinfo">
+        insert into withdrawal_info select * from userdetail where id = #{param1}
+    </insert>
+    <insert id="adddel">
+        insert into withdrawal_reason values (#{param1}, to_char(sysdate, 'YYYY-MM-DD'), #{param2})
+    </insert>
+    <update id="updel">
+        update users set password = #{param1}, isDelete = 'Y' where usernum = #{param2}
+    </update>
+    <update id="nulldel">
+        update userdetail set username = null, mobile = null, address = null, dtaddress = null, email = null, postcode = null where id = #{param1}
+    </update>
+    <select id="findPost" resultType="com.human.gallery.domain.mypage.mypageDTO" parameterType="String">
+        SELECT *
+        FROM (
+                 SELECT rownum as rn, id, title, content, writer, categorylist, heart, postdate, views
+                 FROM (select id, title, content, writer, categorylist, heart, postdate, views
+                       FROM board_post where writer = #{writer} order by id desc, postdate desc))
+        <![CDATA[where rn >= ((#{pageNumber}-1) * 10 + 1) and rownum < 11]]>
+    </select>
+    <select id = "findPostNumById" resultType="Integer" parameterType="String">
+        select count(*) from board_post where writer = #{userId}
+    </select>
+</mapper>

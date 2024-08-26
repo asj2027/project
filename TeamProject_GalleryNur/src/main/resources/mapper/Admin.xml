@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.admin.AdminRepository">
+    <select id = "withDrawalReason" resultType="com.human.gallery.domain.admin.WithDrawalReason">
+        select reason, count(*) as cnt from withdrawal_reason group by reason
+    </select>
+    <select id = "findSalesForNow" resultType="com.human.gallery.domain.admin.ManageGallery">
+        select a.name, nvl(sum(b.amount),0) as sales
+        from exhibition a, reserve b
+        where a.id = b.exhibit_id(+) and a.enddate >= to_char(sysdate, 'yyyy-mm-dd')
+        group by b.exhibit_id, a.name
+    </select>
+    <select id = "findSalesForYear" resultType="com.human.gallery.domain.admin.ManageGallery">
+        select a.name, nvl(sum(b.amount),0) as sales
+        from exhibition a, reserve b
+        where a.id = b.exhibit_id(+) and a.enddate >= to_char(TRUNC(SYSDATE, 'yyyy') ,'yyyy-mm-dd')
+        group by b.exhibit_id, a.name
+    </select>
+    <select id = "findPeopleForNow" resultType="com.human.gallery.domain.admin.ManageGallery">
+        select a.name, nvl(sum(b.person),0) as people
+        from exhibition a, reserve b
+        where a.id = b.exhibit_id(+) and a.enddate >= to_char(sysdate, 'yyyy-mm-dd')
+        group by b.exhibit_id, a.name
+    </select>
+</mapper>

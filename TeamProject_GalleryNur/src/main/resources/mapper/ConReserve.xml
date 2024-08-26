@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.admin.iconReserve">
+    <!-- 리스트 출력 -->
+    <select id='listReserve' resultType="com.human.gallery.domain.admin.conReserveDTO" parameterType="com.human.gallery.domain.paging.pageDTO">
+        select *
+        from	(select rownum as seq, d.*
+                 from	((select rownum as rn, a.orderid as orderId, a.reservedate, a.person, a.amount,
+                                 b.name as exhibitName, c.username as userName
+                          from reserve a, exhibition b, userdetail c
+                          where a.exhibit_id=b.id
+                          and a.userid=c.id
+                          and a.ispayment='Y'
+                          and b.name like '%' || #{keyword, jdbcType=VARCHAR} || '%'
+                          order by rownum) d)
+                 where rownum <![CDATA[<=]]> #{lastRow})
+        where seq <![CDATA[>=]]> #{firstRow} order by reservedate desc
+    </select>
+    <!-- 예약테이블 레코드 카운트 -->
+    <select id="reserveCount" parameterType="com.human.gallery.domain.paging.pageDTO" resultType="int">
+        select count(*)
+        from reserve a, exhibition b
+        where a.exhibit_id=b.id
+        and a.ispayment='Y'
+        and b.name like '%' || #{keyword, jdbcType=VARCHAR} || '%'
+    </select>
+    <!-- 예약 삭제 -->
+    <delete id="payDelete">
+        delete from payment_state where orderId=#{param1}
+    </delete>
+    <delete id="reserveDelete">
+        delete from reserve where orderId=#{param1}
+    </delete>
+</mapper>

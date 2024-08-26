@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.human.gallery.domain.artist.ArtistRepository">
+
+    <insert id = "addArtist">
+        insert into artist
+        values (artist_seq.nextval, #{param1}, #{param2}, #{param3}, #{param4})
+    </insert>
+
+    <select id = "findAll" resultType="com.human.gallery.domain.artist.Artist">
+        select * from artist order by id desc
+    </select>
+    <select id = "findById" resultType="com.human.gallery.domain.artist.Artist">
+        select * from artist where id = #{param1}
+    </select>
+
+    <delete id = "deleteById">
+        delete from artist where id = #{param1}
+    </delete>
+
+    <update id = "modifyById">
+        update artist set profile = #{param1}, name = #{param2}, career = #{param3}, direction = #{param4} where id = #{param5}
+    </update>
+
+    <update id = "modifyByIdWithOutImage">
+        update artist set name = #{param1}, career = #{param2}, direction = #{param3} where id = #{param4}
+    </update>
+</mapper>
